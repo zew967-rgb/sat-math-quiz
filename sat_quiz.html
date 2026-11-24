@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Digital SAT Math - Section 2, Module 1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #1e293b;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    h1 {
+      margin-top: 0;
+      color: #0f172a;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+    }
+    .quiz-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+      background: #fafafa;
+    }
+    .q-header {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+    .q-text {
+      font-size: 1rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      margin-bottom: 16px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    input[type="text"] {
+      width: 100%;
+      max-width: 250px;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      background: #2563eb;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .submit-btn:hover {
+      background: #1d4ed8;
+    }
+    .explanation {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      display: none;
+    }
+    .explanation.correct {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 4px solid #22c55e;
+    }
+    .explanation.incorrect {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 4px solid #ef4444;
+    }
+    #result-box {
+      display: none;
+      padding: 16px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1e40af;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 Digital SAT Math - Section 2, Module 1</h1>
+    <div id="result-box"></div>
+    <div id="quiz-list"></div>
+    <button class="submit-btn" id="submit-all" onclick="gradeQuiz()">Nộp bài & Xem đáp án chi tiết</button>
+  </div>
+
+  <script>
+    let questions = [];
+
+    fetch('sat_math_test.json')
+      .then(r => r.json())
+      .then(data => {
+        questions = data;
+        renderQuiz();
+      })
+      .catch(err => {
+        console.error("Lỗi đọc json:", err);
+      });
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-list');
+      container.innerHTML = '';
+      questions.forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.id = `card-${q.id}`;
+
+        let inputHtml = '';
+        if (q.type === 'multiple_choice') {
+          inputHtml = `<div class="options">` +
+            Object.entries(q.options).map(([k, v]) => `
+              <label class="option-label">
+                <input type="radio" name="q-${q.id}" value="${k}">
+                <strong>${k})</strong> ${v}
+              </label>
+            `).join('') + `</div>`;
+        } else {
+          inputHtml = `
+            <div>
+              <label style="display:block; margin-bottom:6px; font-weight:600;">Đáp số:</label>
+              <input type="text" id="input-${q.id}" placeholder="Nhập số...">
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="q-header">Câu ${q.id} [${q.type === 'multiple_choice' ? 'Trắc nghiệm' : 'Điền số'}]</div>
+          <div class="q-text">${escapeHtml(q.question)}</div>
+          ${inputHtml}
+          <div class="explanation" id="exp-${q.id}"></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function gradeQuiz() {
+      let score = 0;
+      questions.forEach(q => {
+        let userAns = '';
+        if (q.type === 'multiple_choice') {
+          const selected = document.querySelector(`input[name="q-${q.id}"]:checked`);
+          userAns = selected ? selected.value : '';
+        } else {
+          const input = document.getElementById(`input-${q.id}`);
+          userAns = input ? input.value.trim() : '';
+        }
+
+        let isCorrect = false;
+        if (q.type === 'multiple_choice') {
+          isCorrect = (userAns.toUpperCase() === q.correct_answer.toUpperCase());
+        } else {
+          isCorrect = (parseFloat(userAns) === parseFloat(q.correct_answer) || userAns === q.correct_answer);
+        }
+
+        const expEl = document.getElementById(`exp-${q.id}`);
+        expEl.style.display = 'block';
+
+        if (isCorrect) {
+          score++;
+          expEl.className = 'explanation correct';
+          expEl.innerHTML = `<strong>✅ Chính xác!</strong> Đáp án: <b>${q.correct_answer}</b><br>💡 <i>${escapeHtml(q.explanation)}</i>`;
+        } else {
+          expEl.className = 'explanation incorrect';
+          expEl.innerHTML = `<strong>❌ Chưa đúng!</strong> Bạn chọn: <b>${userAns || '(bỏ trống)'}</b> | Đáp án đúng: <b>${q.correct_answer}</b><br>💡 <i>${escapeHtml(q.explanation)}</i>`;
+        }
+      });
+
+      const resBox = document.getElementById('result-box');
+      resBox.style.display = 'block';
+      const pct = Math.round((score / questions.length) * 100);
+      resBox.innerHTML = `🎉 Điểm số của bạn: ${score} / ${questions.length} (${pct}%)`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>

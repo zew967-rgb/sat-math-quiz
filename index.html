@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Digital SAT Math - Section 2, Module 1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      padding: 20px 12px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 28px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    header {
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 1.6rem;
+      color: #0f172a;
+    }
+    header p {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+    .result-banner {
+      display: none;
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .result-banner h2 {
+      font-size: 1.4rem;
+      color: #1d4ed8;
+      margin-bottom: 6px;
+    }
+    .quiz-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+    .q-title {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .q-text {
+      font-size: 1.05rem;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.15s ease-in-out;
+    }
+    .option-item:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .option-item input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .input-box {
+      width: 100%;
+      max-width: 260px;
+      padding: 10px 14px;
+      font-size: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+    }
+    .input-box:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    .explanation {
+      display: none;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .explanation.correct {
+      background: #ecfdf5;
+      border-left: 4px solid #10b981;
+      color: #065f46;
+    }
+    .explanation.wrong {
+      background: #fef2f2;
+      border-left: 4px solid #ef4444;
+      color: #991b1b;
+    }
+    .btn-submit {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover {
+      background: #1d4ed8;
+    }
+    @media (max-width: 640px) {
+      .container { padding: 18px 14px; }
+      header h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Digital SAT Math - Section 2, Module 1</h1>
+      <p>Tổng số câu hỏi: 22 câu | Hãy chọn hoặc nhập đáp án và nhấn Nộp bài</p>
+    </header>
+
+    <div class="result-banner" id="result-banner">
+      <h2 id="result-score"></h2>
+      <p id="result-desc"></p>
+    </div>
+
+    <div id="quiz-list"></div>
+
+    <button class="btn-submit" onclick="submitExam()">Nộp bài & Xem lời giải chi tiết</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        id: 1,
+        type: "mcq",
+        question: "x + y = 87\n\nThe given equation relates the total number of marble queen pothos stems, x, and the total number of snow queen pothos stems, y, a plant nursery propagates to create pothos plants. If 17 snow queen pothos stems are propagated, how many marble queen pothos stems are propagated?",
+        options: { "A": "17", "B": "53", "C": "87", "D": "70" },
+        ans: "D",
+        exp: "Thay y = 17 vào: x + 17 = 87 => x = 87 - 17 = 70."
+      },
+      {
+        id: 2,
+        type: "mcq",
+        question: "If 4 + x = 2, what is the value of -12 - 3x?",
+        options: { "A": "-6", "B": "18", "C": "6", "D": "-3" },
+        ans: "A",
+        exp: "4 + x = 2 => x = -2. Thay vào: -12 - 3(-2) = -12 + 6 = -6 (hoặc -12 - 3x = -3(4 + x) = -3(2) = -6)."
+      },
+      {
+        id: 3,
+        type: "mcq",
+        question: "The function k is defined by k(x) = x³ + 400. What is the value of k(x) when x = 2?",
+        options: { "A": "400", "B": "405", "C": "406", "D": "408" },
+        ans: "D",
+        exp: "k(2) = 2³ + 400 = 8 + 400 = 408."
+      },
+      {
+        id: 4,
+        type: "mcq",
+        question: "Which expression is a factor of x⁴ + 6ax² + 9a² - 81, where a is a positive constant?",
+        options: { "A": "x² - 3a - 9", "B": "x² - 9a", "C": "x² + 6a", "D": "x² + 3a + 9" },
+        ans: "D",
+        exp: "x⁴ + 6ax² + 9a² - 81 = (x² + 3a)² - 9² = (x² + 3a - 9)(x² + 3a + 9). Do đó x² + 3a + 9 là một nhân tử."
+      },
+      {
+        id: 5,
+        type: "mcq",
+        question: "The ratio s to t is equivalent to the ratio 1 to 3. If the value of s is multiplied by 15, how will the value of t change to maintain this ratio?",
+        options: {
+          "A": "It will be multiplied by 1.",
+          "B": "It will be multiplied by 18.",
+          "C": "It will be multiplied by 12.",
+          "D": "It will be multiplied by 15."
+        },
+        ans: "D",
+        exp: "Vì tỉ số s/t = 1/3, nếu s nhân 15 thì t cũng phải nhân 15 để phân số không thay đổi."
+      },
+      {
+        id: 6,
+        type: "frq",
+        question: "Line p is defined by y = 4x - 2. Line s is parallel to line p in the xy-plane. What is the slope of line s?",
+        ans: "4",
+        exp: "Hai đường thẳng song song có cùng hệ số góc. Đường thẳng p có hệ số góc m = 4 nên hệ số góc của đường thẳng s cũng là 4."
+      },
+      {
+        id: 7,
+        type: "mcq",
+        question: "In right triangle DEF (right angle at E), leg DE = 60, and leg EF = 70. What is the value of tan F in the triangle shown?",
+        options: { "A": "70/60", "B": "60/70", "C": "70/130", "D": "60/130" },
+        ans: "B",
+        exp: "tan(F) = đối / kề = DE / EF = 60 / 70."
+      },
+      {
+        id: 8,
+        type: "mcq",
+        question: "2x(x - 1)(x + 8) = 0. What is one of the solutions to the given equation?",
+        options: { "A": "8", "B": "2", "C": "0", "D": "-1" },
+        ans: "C",
+        exp: "Phương trình tích có các nghiệm x = 0, x = 1, x = -8. Phương án C là 0."
+      },
+      {
+        id: 9,
+        type: "mcq",
+        question: "x² + 33 = 33 + x². How many distinct real solutions does the given equation have?",
+        options: { "A": "Exactly two", "B": "Exactly one", "C": "Infinitely many", "D": "Zero" },
+        ans: "C",
+        exp: "Hai vế bằng nhau với mọi số thực x (đồng nhất thức), do đó phương trình có vô số nghiệm (Infinitely many)."
+      },
+      {
+        id: 10,
+        type: "frq",
+        question: "The table shows three values of x and their corresponding values of y: (0, 80), (1, 86), (2, 92). There is a linear relationship between x and y. What is the y-coordinate of the y-intercept of the line in the xy-plane that represents this relationship?",
+        ans: "80",
+        exp: "Giao điểm với trục y (y-intercept) ứng với x = 0. Theo bảng, khi x = 0 thì y = 80."
+      },
+      {
+        id: 11,
+        type: "frq",
+        question: "A model estimates that the population of a state was 5 million in 1990 and increased by 0.043 million each year until 2016. According to the model, what was the estimated population of this state, in millions, 10 years after 1990?",
+        ans: "5.43",
+        exp: "Sau 10 năm: Dân số = 5 + 0.043 × 10 = 5 + 0.43 = 5.43 triệu."
+      },
+      {
+        id: 12,
+        type: "mcq",
+        question: "At what point (x, y) do the graphs of the equations y = 2x + 5 and y = 3x - 6 intersect in the xy-plane?",
+        options: { "A": "(3, 2)", "B": "(27, 11)", "C": "(11, 27)", "D": "(2, 3)" },
+        ans: "C",
+        exp: "2x + 5 = 3x - 6 => x = 11. Thay x = 11 vào: y = 2(11) + 5 = 27. Giao điểm là (11, 27)."
+      },
+      {
+        id: 13,
+        type: "mcq",
+        question: "In the figure shown, triangle CAE is similar to triangle CBD. The measure of angle CBD is 59°, and AE = 25(BD). What is the measure of angle CAE?",
+        options: { "A": "59°", "B": "(25 · 59)°", "C": "25°", "D": "(25 + 59)°" },
+        ans: "A",
+        exp: "Hai tam giác đồng dạng thì các góc tương ứng luôn bằng nhau. Góc CAE tương ứng với góc CBD, do đó góc CAE = 59°."
+      },
+      {
+        id: 14,
+        type: "mcq",
+        question: "Quinidra drove her car on a straight road to a certain location. The graph models Quinidra's distance, in miles, from her home as a function of time, in hours. The graph goes from (0,0) to (1,20), stays flat at 20 from t=1 to t=5, and returns to 0 at t=6. Which of the following could the model describe?",
+        options: {
+          "A": "Quinidra drove away from her home at a constant speed for 1 hour, spent 4 hours at the location, then drove back to her home at a constant speed for 1 hour.",
+          "B": "Quinidra drove away from her home at a constant speed for 1 hour, spent 4 hours at the location, then continued to drive away from her home at a constant speed for 1 hour.",
+          "C": "Quinidra drove away from her home at an increasing speed for 1 hour, drove at a constant speed for 4 hours, then drove back to her home at a decreasing speed for 1 hour.",
+          "D": "Quinidra drove away from her home at an increasing speed for 1 hour, spent 4 hours at the location, then drove back to her home at a decreasing speed for 1 hour."
+        },
+        ans: "A",
+        exp: "Đồ thị là các đoạn thẳng tuyến tính, thể hiện tốc độ không đổi (constant speed). 1 giờ đầu đi xa nhà, 4 giờ tiếp theo dừng lại (khoảng cách không đổi), 1 giờ cuối đi về nhà."
+      },
+      {
+        id: 15,
+        type: "mcq",
+        question: "r(x) = p / (x - 3) + 14. The graph of y = r(x) in the xy-plane is translated 8 units to the left to produce the graph of y = t(x). Which equation defines function t?",
+        options: {
+          "A": "t(x) = p / (x - 3 + 8) + 14",
+          "B": "t(x) = p / (x - 3 - 8) + 14",
+          "C": "t(x) = p / (x - 3) + 14 - 8",
+          "D": "t(x) = (p - 8) / (x - 3) + 14"
+        },
+        ans: "A",
+        exp: "Tịnh tiến sang trái 8 đơn vị: thay x bằng (x + 8). Ta được: t(x) = p / (x - 3 + 8) + 14."
+      },
+      {
+        id: 16,
+        type: "mcq",
+        question: "The table shows the distribution of 161 igneous rocks: Granitic has 33 coarse-grained and 17 fine-grained; Andesitic has 22 coarse and 16 fine; Basaltic has 42 coarse and 31 fine. What fraction of the laboratory's granitic rocks are coarse-grained?",
+        options: { "A": "33 / 161", "B": "97 / 161", "C": "33 / 50", "D": "33 / 97" },
+        ans: "C",
+        exp: "Tổng số đá granitic là 33 + 17 = 50. Trong đó số mẫu coarse-grained là 33. Phân số là 33/50."
+      },
+      {
+        id: 17,
+        type: "mcq",
+        question: "The height of a right circular cylinder is 21 inches, and the circumference of its base is 210 inches. Which expression represents the total surface area, in square inches, of the cylinder?",
+        options: {
+          "A": "π(105/π)²(21)",
+          "B": "(21)(210) + 2π(105/π)²",
+          "C": "(21)(210)",
+          "D": "(21)(210) + π(105/π)²"
+        },
+        ans: "B",
+        exp: "Chu vi đáy C = 2πr = 210 => r = 105/π. Diện tích xung quanh = C × h = (21)(210). Diện tích 2 đáy = 2 × π × r² = 2π(105/π)². Tổng diện tích = (21)(210) + 2π(105/π)²."
+      },
+      {
+        id: 18,
+        type: "mcq",
+        question: "An exponential model estimates that the mass, in grams, of a nuclide decreases by 21% every 10.54 minutes. Which of the following equations could represent this model, where M is the estimated mass, in grams, of the sample t minutes after observing?",
+        options: {
+          "A": "M = 100(0.79)^(t / 10.54)",
+          "B": "M = 100(0.21)^(t + 10.54)",
+          "C": "M = 100(0.21)^(t / 10.54)",
+          "D": "M = 100(0.79)^(t + 10.54)"
+        },
+        ans: "A",
+        exp: "Mỗi chu kỳ khối lượng còn lại là 100% - 21% = 79% (tức nhân hệ số 0.79). Số chu kỳ sau t phút là t / 10.54. Do đó M = 100(0.79)^(t / 10.54)."
+      },
+      {
+        id: 19,
+        type: "frq",
+        question: "x² - 11x + 12 = 0. The solutions to the given equation can be written in the form (11 ± √k) / 2, where k is a constant. What is the value of k?",
+        ans: "73",
+        exp: "Theo công thức nghiệm: x = (-b ± √(b² - 4ac)) / 2a = (11 ± √((-11)² - 4(1)(12))) / 2 = (11 ± √(121 - 48)) / 2 = (11 ± √73) / 2 => k = 73."
+      },
+      {
+        id: 20,
+        type: "mcq",
+        question: "A hollow steel pipe is in the shape of a right circular cylinder. The pipe has an outside diameter of 36 inches, a wall thickness of 5/8 inches, and a height of 144 inches. Which of the following is closest to the volume, in cubic inches, of the wall of this steel pipe?",
+        options: { "A": "565", "B": "1,620", "C": "177", "D": "10,002" },
+        ans: "D",
+        exp: "Bán kính ngoài R = 18. Bán kính trong r = 18 - 5/8 = 17.375. Thể tích thành ống V = π × (R² - r²) × h = π × (18² - 17.375²) × 144 ≈ 10,002 inch khối."
+      },
+      {
+        id: 21,
+        type: "frq",
+        question: "Object Z has a mass of 180 grams. The mass of object X is 3,900% of the mass of object Z. The mass of object Z is 25% of the mass of object Y. The sum, in grams, of the mass of object X and the mass of object Y is equal to the product, in grams, of w and the mass of object Z, where w is a constant. What is the value of w?",
+        ans: "43",
+        exp: "X = 39 × Z. Z = 0.25 × Y => Y = 4 × Z. Tổng X + Y = 39Z + 4Z = 43Z. Theo bài ra X + Y = w × Z => w = 43."
+      },
+      {
+        id: 22,
+        type: "mcq",
+        question: "The function f(x) is defined as 43 more than 6 times a number x. If y = f(x) is graphed in the xy-plane, what is the best interpretation of the x-intercept?",
+        options: {
+          "A": "When f(x) = 0, the number is -43/6.",
+          "B": "The value of f(x) increases by 1 for each increase of 6 in the value of the number.",
+          "C": "For each increase of 1 in the value of the number, f(x) increases by 6.",
+          "D": "When the number is 0, f(x) = 43."
+        },
+        ans: "A",
+        exp: "f(x) = 6x + 43. Giao điểm với trục hoành (x-intercept) là khi f(x) = 0 => 6x + 43 = 0 => x = -43/6."
+      }
+    ];
+
+    function renderQuestions() {
+      const list = document.getElementById("quiz-list");
+      list.innerHTML = "";
+
+      questions.forEach((q, idx) => {
+        const card = document.createElement("div");
+        card.className = "quiz-card";
+
+        let bodyHtml = "";
+        if (q.type === "mcq") {
+          bodyHtml = `<div class="options">` +
+            Object.entries(q.options).map(([k, v]) => `
+              <label class="option-item">
+                <input type="radio" name="q-${q.id}" value="${k}">
+                <span><b>${k})</b> ${v}</span>
+              </label>
+            `).join("") + `</div>`;
+        } else {
+          bodyHtml = `
+            <div>
+              <input type="text" class="input-box" id="inp-${q.id}" placeholder="Nhập kết quả số...">
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="q-title">Câu ${q.id} • ${q.type === 'mcq' ? 'Trắc nghiệm' : 'Điền số'}</div>
+          <div class="q-text">${escapeText(q.question)}</div>
+          ${bodyHtml}
+          <div class="explanation" id="exp-${q.id}"></div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function submitExam() {
+      let score = 0;
+
+      questions.forEach(q => {
+        let userAns = "";
+        if (q.type === "mcq") {
+          const checked = document.querySelector(`input[name="q-${q.id}"]:checked`);
+          userAns = checked ? checked.value : "";
+        } else {
+          const inp = document.getElementById(`inp-${q.id}`);
+          userAns = inp ? inp.value.trim() : "";
+        }
+
+        let isCorrect = false;
+        if (q.type === "mcq") {
+          isCorrect = (userAns.toUpperCase() === q.ans.toUpperCase());
+        } else {
+          isCorrect = (parseFloat(userAns) === parseFloat(q.ans) || userAns === q.ans);
+        }
+
+        const expEl = document.getElementById(`exp-${q.id}`);
+        expEl.style.display = "block";
+
+        if (isCorrect) {
+          score++;
+          expEl.className = "explanation correct";
+          expEl.innerHTML = `<b>✅ Đúng!</b> Đáp án: <b>${q.ans}</b><br>💡 ${escapeText(q.exp)}`;
+        } else {
+          expEl.className = "explanation wrong";
+          expEl.innerHTML = `<b>❌ Chưa chính xác.</b> Bạn chọn: <b>${userAns || '(chưa làm)'}</b> | Đáp án đúng: <b>${q.ans}</b><br>💡 ${escapeText(q.exp)}`;
+        }
+      });
+
+      const banner = document.getElementById("result-banner");
+      banner.style.display = "block";
+      const pct = Math.round((score / questions.length) * 100);
+      document.getElementById("result-score").innerText = `Kết quả: ${score} / ${questions.length} câu đúng (${pct}%)`;
+      document.getElementById("result-desc").innerText = score >= 18 ? "Xuất sắc! Bạn nắm rất vững kiến thức Module này." : "Hãy xem lại lời giải chi tiết bên dưới các câu chưa đúng nhé!";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function escapeText(str) {
+      if (!str) return "";
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    renderQuestions();
+  </script>
+</body>
+</html>
